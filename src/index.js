@@ -1,15 +1,78 @@
-import React from 'react';
+import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
-import { Provider } from 'react-redux';
-import { createStore, applyMiddleware } from 'redux';
+import YTSearch from 'youtube-api-search';
 
-import App from './components/app';
-import reducers from './reducers';
+import SearchBar from './components/search_bar';
+import VideoList from './components/video_list';
 
-const createStoreWithMiddleware = applyMiddleware()(createStore);
+//import VideoListItem from '.components/video_list_item';
+import VideoDetail from './components/video_detail';
 
-ReactDOM.render(
-  <Provider store={createStoreWithMiddleware(reducers)}>
-    <App />
-  </Provider>
-  , document.querySelector('.container'));
+// cerate a new coponent. this componenet will produce some HTML
+
+const API_KEY = 'AIzaSyAX4iDX0i3CnRO0Hc6Rd9jmtFwiQd3xQgw';
+
+
+/*
+class App extends Component{
+  constructor(props){
+    super(props);
+
+    this.state = {videos:[]};
+
+    YTSearch({key:API_KEY, term:'Ateeb'}, (videos)=> {
+      this.setState({videos});
+    });
+  }
+
+  render(){
+    return (
+      <div>
+        <SearchBar />
+        <VideoDetail video={this.state.videos[0]} />
+        <VideoList videos = {this.state.videos} />
+      </div>
+    );
+  }
+}
+*/
+class App extends Component {
+  constructor(props) {
+
+      super(props);
+
+      this.state = {
+        videos: [],
+        selectedVideo : null
+      };
+
+
+      this.videoSearch('surfboards');
+  }
+
+  videoSearch(term){
+    YTSearch({ key: API_KEY, term:term}, (videos)=>{
+        this.setState({
+          videos:videos,
+          selectedVideo : videos[0]
+        });
+        //console.log(videos)
+    });
+
+  }
+  render(){
+    return (
+        <div>
+          <SearchBar onSearchTermChange={term => this.videoSearch({term})} />
+          <VideoDetail video={this.state.selectedVideo} />
+          <VideoList
+            onVideoSelect = { selectedVideo=> this.setState({selectedVideo})}
+            videos={this.state.videos} />
+        </div>
+    );
+  }
+}
+
+
+// Take this componenet's generated HTML and put it on the page(in the DOM
+ReactDOM.render(<App />, document.querySelector('.container'));
